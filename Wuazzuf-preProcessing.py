@@ -49,17 +49,27 @@ def getBinaryRepresentation(enum, columnName1, columnName2, columnName3):
     return result
 
 
+# represent list in binary
+def addBinaryAsFeatures(enum, columnName1, columnName2, columnName3):
+    for i in enum:
+        newFeature = []
+        for j in range(len(data[columnName1])):
+            if (i == data[columnName1][j]) | (i == data[columnName2][j]) | (i == data[columnName3][j]):
+                newFeature.append(1)
+            else:
+                newFeature.append(0)
+        # print("result len: ", newFeature)
+        data[i] = newFeature
+    # return result
+
+
 def convertStringsToNumbers():
     # creating labelEncoder
     le = preprocessing.LabelEncoder()
 
     for i in newColumns:
-        if (i == "salary_minimum") | (i == "salary_maximum") | (i == "num_vacancies") | (i == "job_industry")\
-                | (i == "job_category"):
-            continue
-
-        data[i] = le.fit_transform(data[i])
-
+        if (i == "city") | (i == "job_title") | (i == "num_vacancies") | (i == "career_level"):
+            data[i] = le.fit_transform(data[i])
 
 # Cities data before processing
 # enumCity = getEnum("city")
@@ -77,34 +87,33 @@ removeSpaces("city")
 removeSpaces("job_category1")
 enumCategory = getEnum("job_category1")
 print("enumCategory len: ", len(enumCategory))
-data["job_category"] = getBinaryRepresentation(enumCategory, "job_category1", "job_category2", "job_category3")
+addBinaryAsFeatures(enumCategory, "job_category1", "job_category2", "job_category3")
 
 
 # Get all available values for job_industry
-removeSpaces("job_industry1")
-removeSpaces("job_industry2")
-enumIndustry = getEnum("job_industry1")
-enumIndustry2 = getEnum("job_industry2")
-print("enumIndustry len: ", len(enumIndustry))
+# removeSpaces("job_industry1")
+# removeSpaces("job_industry2")
+# enumIndustry = getEnum("job_industry1")
+# enumIndustry2 = getEnum("job_industry2")
+# print("enumIndustry len: ", len(enumIndustry))
+#
+# #  merge job_industry1 with job_industry2
+# for i in enumIndustry2:
+#     found = False
+#     for j in enumIndustry:
+#         if j == i:
+#             found = True
+#
+#     if not found:
+#         print("New: ", i)
+#         enumIndustry.append(i)
+# print("enumIndustry len: ", len(enumIndustry))
+#
+#
+# data["job_industry"] = getBinaryRepresentation(enumIndustry, "job_industry1", "job_industry2", "job_industry3")
 
-#  merge job_industry1 with job_industry2
-for i in enumIndustry2:
-    found = False
-    for j in enumIndustry:
-        if j == i:
-            found = True
 
-    if not found:
-        print("New: ", i)
-        enumIndustry.append(i)
-print("enumIndustry len: ", len(enumIndustry))
-
-
-data["job_industry"] = getBinaryRepresentation(enumIndustry, "job_industry1", "job_industry2", "job_industry3")
-
-
-newColumns = ["city", "job_title", "salary_minimum", "salary_maximum", "num_vacancies", "career_level",
-              "experience_years", "job_category", "job_industry"]
+newColumns = ["city", "job_title", "salary_minimum", "salary_maximum", "num_vacancies", "career_level"] + enumCategory
 
 data = data[newColumns]
 
@@ -112,16 +121,16 @@ convertStringsToNumbers()
 
 print(data.head())
 
-# predict = "salary_minimum"
-# x = np.array(data.drop([predict], 1))
-# y = np.array(data[predict])
-# x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
-#
-# linear = linear_model.LinearRegression()
-# linear.fit(x_train, y_train)
-#
-# acc = linear.score(x_test, y_test)
-# print("accc: ", acc)
+predict = "salary_minimum"
+x = np.array(data.drop([predict], 1))
+y = np.array(data[predict])
+x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
+
+linear = linear_model.LinearRegression()
+linear.fit(x_train, y_train)
+
+acc = linear.score(x_test, y_test)
+print("accc: ", acc)
 
 
 
